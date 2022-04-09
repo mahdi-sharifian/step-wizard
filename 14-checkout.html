@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Step From Wizard - 14 - checkout</title>
+
+    <script src="plugins/jquery-2.1.4.min.js"></script>
+
+    <!-- bootstrap for better look example, but not necessary -->
+    <link rel="stylesheet" href="plugins/bootstrap/css/bootstrap.min.css" type="text/css" media="screen, projection">
+
+    <!-- Step Form Wizard plugin -->
+    <link rel="stylesheet" href="step-form-wizard/css/step-form-wizard-all.css" type="text/css" media="screen, projection">
+    <script src="step-form-wizard/js/step-form-wizard.js"></script>
+
+    <!-- nicer scroll in steps -->
+    <link rel="stylesheet" href="plugins/mcustom-scrollbar/jquery.mCustomScrollbar.min.css">
+    <script src="plugins/mcustom-scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+
+    <!-- validation library http://jqueryvalidation.org/ -->
+    <script src="plugins/jquery-validation/jquery.validate.min.js"></script>
+
+    <script>
+        var sfw;
+        $(document).ready(function() {
+            var form = $("#wizard_example");
+            form.validate();
+            sfw = $("#wizard_example").stepFormWizard({
+                theme: 'sun',
+                rtl: true,
+                linkNav: 'prev',
+                height: 'auto',
+                onNext: function() {
+                    var valid = form.valid();
+                    // if use height: 'auto' call refresh metod after validation, because validation can change content
+                    sfw.refresh();
+                    return valid;
+                },
+                onFinish: function() {
+                    var valid = form.valid();
+                    // if use height: 'auto' call refresh metod after validation, because validation can change content
+                    sfw.refresh();
+                    return valid;
+                }
+            });
+
+            // init
+            sfw.disableStep();
+            sfw.activeNext(false, false);
+            $('#summary_billing').hide();
+            $('.card_sum').hide();
+
+            // ************ EVENTS ***************
+            // active next button after approval condition
+            $('#condition').on('click', function() {
+                if ($(this).is(':checked')) {
+                    sfw.activeNext(true, true);
+                    $('#condition-text').removeClass('alert-danger');
+                } else {
+                    sfw.activeNext(false, false);
+                    $('#condition-text').addClass('alert-danger');
+                }
+            })
+
+            // if billing information is not same as shipping
+            $('#billing_same').click(function() {
+                if ($(this).is(':checked')) {
+                    sfw.disableStep(2);
+                    $('#summary_billing').hide();
+                } else {
+                    sfw.disableStep(2, false);
+                    $('#summary_billing').show();
+                }
+            })
+
+            // if payment is via credit card, then add new step with additional information about card
+            $('.pay').on('change', function() {
+                    if ($('#card').is(':checked')) {
+                        sfw.addStep(4, $('#credit_step').html()); // you can also use ajax request for step
+                        $('.card_sum').show();
+                    } else {
+                        sfw.removeStep(4);
+                        $('.card_sum').hide();
+                    }
+                })
+                // ************ END EVENTS ***************
+        })
+        $(window).load(function() {
+            /* only if you want use mcustom scrollbar */
+            $(".sf-step").mCustomScrollbar({
+                theme: "dark-3",
+                scrollButtons: {
+                    enable: true
+                }
+            });
+        });
+    </script>
+
+    <style>
+        pre {
+            margin: 45px 0 60px;
+        }
+        
+        h2 {
+            margin: 60px 0 30px 0;
+        }
+        
+        p {
+            margin-bottom: 10px;
+        }
+        
+        .hide-step {
+            display: none;
+        }
+        
+        .error {
+            color: #c7254e;
+        }
+        
+        #condition-text {
+            padding-left: 35px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="site-index">
+            <div class="body-content">
+
+                <div class="row" style="margin-top: 70px;">
+                    <div class="col-md-12">
+
+
+                        <form id="wizard_example" action="" dir="rtl">
+                            <fieldset>
+                                <legend>اطلاعات اصلی</legend>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="secondName">نام خانوادگی</label>
+                                            <input type="text" class="form-control" id="secondName" name="secondName" placeholder="نام خانوادگی" required>
+
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="mobile">موبایل</label>
+                                            <input type="number" class="form-control" id="mobile" name="mobile" placeholder="شماره تماس" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="firstName">نام</label>
+                                            <input type="text" class="form-control" id="firstName" name="firstName" placeholder="نام" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="email">ایمیل</label>
+                                            <input type="email" class="form-control" id="email" name="email" placeholder="ایمیل" required>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-lg-12">
+                                        <div class="pull-right">
+                                            <div class="checkbox">
+                                                <label>
+                                                <div id="condition-text" class="alert alert-success alert-danger">
+                                                    <input type="checkbox" id="condition" name="condition" value="yes" data-sf-text="Yes">
+                                                   بله قبول دارم
+                                                </div>
+                                            </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <legend>آدرس</legend>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="state">استان</label>
+                                            <input type="text" class="form-control" id="state" name="state" placeholder="استان" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="city">شهر</label>
+                                            <input type="text" class="form-control" id="city" name="city" placeholder="شهر" required>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="address">آدرس</label>
+                                            <input type="text" class="form-control" id="address" name="address" placeholder="آدرس" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="zip">کد شهر</label>
+                                            <input type="nu" class="form-control" id="zip" name="zip" placeholder="پیش شماره" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <legend>مرحله 3</legend>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="inputState">میزان تحصیلات</label>
+                                            <select id="inputState" class="form-control" required>
+                                          <option selected>دیپلم</option>
+                                          <option selected>فوق دیپلم</option>
+                                          <option selected>کارشناسی</option>
+                                          <option selected>ارشد</option>
+                                          <option selected>دکتری</option>
+                                          <option selected>...</option>
+                                        </select>
+                                        </div>
+                                        <div class="form-group" style="margin: 30px 15px 0 0;">
+                                            <input type="file" class="custom-file-input" id="customFile" required>
+
+
+                                            <div>
+                                                <p>
+                                                    <strong>لطفا فایل را بارگزاری کنید</strong>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-lg-6">
+
+                                        <div class="form-group" required>
+                                            <label for="inputState" required>وضعیت جسمانی</label>
+                                            <select id="inputState" class="form-control" required>
+                      <option selected>سالم</option>
+                      <option selected>معلول</option>
+                      <option selected>جانباز</option>
+                     
+                      <option selected>...</option>
+                    </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputState">وضعیت اشتغال</label>
+                                            <select id="inputState" class="form-control" required>
+                                          <option selected>همه</option>
+                                          <option selected>بیکار</option>
+                                          <option selected>مشغول به کار</option>
+                                         
+                                          <option selected>...</option>
+                                          </select>
+                                        </div>
+
+
+                            </fieldset>
+
+                            <fieldset data-sf-step="summary">
+                                <legend>مرحله اخر</legend>
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <h3>اطلاعات اصلی</h3>
+                                        <table>
+                                            <tr>
+                                                <td style="width: 150px;">نام: </td>
+                                                <td>{{firstName}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>نام خانوادگی: </td>
+                                                <td>{{secondName}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>ایمیل: </td>
+                                                <td>{{email}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>موبایل: </td>
+                                                <td>{{mobile|not set}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h3>آدرس</h3>
+                                        <table>
+                                            <tr>
+                                                <td style="width: 150px;">استان: </td>
+                                                <td>{{state}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>شهر: </td>
+                                                <td>{{city}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>ادرس: </td>
+                                                <td>{{address}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>پیش شماره: </td>
+                                                <td>{{zip}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-lg-4" id="summary_billing">
+                                        <h3>Billing address</h3>
+                                        <table>
+                                            <tr>
+                                                <td style="width: 150px;">State: </td>
+                                                <td>{{b_state}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>City: </td>
+                                                <td>{{b_city}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Address: </td>
+                                                <td>{{b_address}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>ZIP: </td>
+                                                <td>{{b_zip}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4" id="summary_billing">
+                                        <h3>بررسی نهایی و ثبت</h3>
+                                        <table>
+
+                                            <tr class="card_sum">
+                                                <td>Card number: </td>
+                                                <td>{{credit_num}}</td>
+                                            </tr>
+                                            <tr class="card_sum">
+                                                <td>CVV: </td>
+                                                <td>{{cvv}}</td>
+                                            </tr>
+                                            <tr class="card_sum">
+                                                <td>Expiration date: </td>
+                                                <td>{{expiration}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <noscript>
+                                <input class="nocsript-finish-btn sf-right nocsript-sf-btn" type="submit"
+                                       name="no-js-clicked" value="finish"/>
+                            </noscript>
+                            </fieldset>
+                        </form>
+                        </div>
+                        </div>
+
+
+
+
+                        <footer class="footer">
+                            <div class="container">
+                                <p class="pull-left">© سی تلکام</p>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+</body>
+
+</html>
